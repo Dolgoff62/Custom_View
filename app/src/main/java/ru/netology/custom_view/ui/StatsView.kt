@@ -9,7 +9,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.withStyledAttributes
 import ru.netology.custom_view.R
-import ru.netology.custom_view.utils.Utils
+import ru.netology.custom_view.utils.*
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -17,15 +17,14 @@ class StatsView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0,
-        defStyleRes: Int = 0
-        ): View(context, attrs, defStyleAttr, defStyleRes) {
-
+        defStyleRes: Int = 0,
+) : View(context, attrs, defStyleAttr, defStyleRes) {
     private var radius = 0F
     private var center = PointF(0F, 0F)
     private var oval = RectF(0F, 0F, 0F, 0F)
 
     private var lineWidth = Utils.dp(context, 5F).toFloat()
-    private var fontSize = Utils.sp(context, 40F).toFloat()
+    private var fontSize = Utils.dp(context, 40F).toFloat()
     private var colors = emptyList<Int>()
 
     init {
@@ -110,23 +109,21 @@ class StatsView @JvmOverloads constructor(
         }
 
         var startFrom = -90F
-        val sumValues = data.sum()
-
         for ((index, datum) in data.withIndex()) {
-            val angle = 360F * (datum / sumValues)
+            val angle = 360F * datum
             paint.color = colors.getOrNull(index) ?: randomColor()
             canvas.drawArc(oval, startFrom, angle, false, paint)
-
             startFrom += angle
         }
 
         canvas.drawText(
-                "%.2f%%".format(sumValues),
+                "%.2f%%".format(data.sum() * 100),
                 center.x,
                 center.y + textPaint.textSize / 4,
-                textPaint
+                textPaint,
         )
     }
 
     private fun randomColor() = Random.nextInt(0xFF000000.toInt(), 0xFFFFFFFF.toInt())
 }
+
