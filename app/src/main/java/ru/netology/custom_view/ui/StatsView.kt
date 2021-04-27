@@ -115,6 +115,9 @@ class StatsView @JvmOverloads constructor(
             val angle = 360F * (datum / sumValues)
             paint.color = colors.getOrNull(index) ?: randomColor()
             canvas.drawArc(oval, startFrom, angle, false, paint)
+            paint.color = colors[0]
+            canvas.drawArc(oval, -90F, 1F, false, paint)
+
             startFrom += angle
         }
 
