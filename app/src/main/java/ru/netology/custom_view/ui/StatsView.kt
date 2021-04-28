@@ -76,14 +76,7 @@ class StatsView @JvmOverloads constructor(
         }
     }
 
-    private val paintOfElements= Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeWidth = lineWidth
-        strokeCap = Paint.Cap.ROUND
-        strokeJoin = Paint.Join.ROUND
-    }
-
-    private val paintOfEmptySpace= Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = lineWidth
         strokeCap = Paint.Cap.ROUND
@@ -103,10 +96,10 @@ class StatsView @JvmOverloads constructor(
         }
 
     var sumValues: Float = 0F
-    set(value) {
-        field = value
-        invalidate()
-    }
+        set(value) {
+            field = value
+            invalidate()
+        }
 
     var colorOfEmptySpace: Int = 0
         set(value) {
@@ -129,21 +122,32 @@ class StatsView @JvmOverloads constructor(
         }
 
         var startFrom = -90F
-        paintOfEmptySpace.color = colorOfEmptySpace
-        canvas.drawCircle(center.x, center.y, radius, paintOfEmptySpace)
+        paint.color = colorOfEmptySpace
+        canvas.drawCircle(center.x, center.y, radius, paint)
 
         for ((index, datum) in data.withIndex()) {
-            val angle = (datum * 3.6F)
-            paintOfElements.color = colors.getOrNull(index) ?: randomColor()
-            canvas.drawArc(oval, startFrom, angle, false, paintOfElements)
-            paintOfElements.color = colors[0]
-            canvas.drawArc(oval, -90F, 1F, false, paintOfElements)
+
+            val angle = if (sumValues > 100F) {
+                360F * (datum / sumValues)
+            } else {
+                (datum * 3.6F)
+            }
+            paint.color = colors.getOrNull(index) ?: randomColor()
+            canvas.drawArc(oval, startFrom, angle, false, paint)
+            paint.color = colors[0]
+            canvas.drawArc(oval, -90F, 1F, false, paint)
 
             startFrom += angle
         }
 
         canvas.drawText(
-                "%.2f%%".format(sumValues),
+                "%.2f%%".format(
+                        if (sumValues > 100F) {
+                            100F
+                        } else {
+                            sumValues
+                        }
+                ),
                 center.x,
                 center.y + textPaint.textSize / 4,
                 textPaint

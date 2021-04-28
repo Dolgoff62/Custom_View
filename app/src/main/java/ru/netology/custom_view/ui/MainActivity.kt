@@ -14,10 +14,10 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<StatsView>(R.id.stats).let {
             it.data = listOf(
-                10F,
-                15F,
-                25F,
-                25F
+                20F,
+                20F,
+                20F,
+                15F
             )
             it.sumValues = it.data.sum()
             it.colorOfEmptySpace = ContextCompat.getColor(this, R.color.light_grey)
