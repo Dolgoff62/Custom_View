@@ -8,8 +8,8 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.withStyledAttributes
-import ru.netology.custom_view.R
-import ru.netology.custom_view.utils.*
+import ru.netology.custom_view.R.styleable
+import ru.netology.custom_view.utils.Utils
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -28,60 +28,68 @@ class StatsView @JvmOverloads constructor(
     private var colors = emptyList<Int>()
 
     init {
-        context.withStyledAttributes(attrs, R.styleable.StatsView) {
-            lineWidth = getDimension(R.styleable.StatsView_lineWidth, lineWidth)
-            fontSize = getDimension(R.styleable.StatsView_fontSize, fontSize)
+        context.withStyledAttributes(attrs, styleable.StatsView) {
+            lineWidth = getDimension(styleable.StatsView_lineWidth, lineWidth)
+            fontSize = getDimension(styleable.StatsView_fontSize, fontSize)
             colors = listOf(
                     getColor(
-                            R.styleable.StatsView_color1,
+                            styleable.StatsView_color1,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color2,
+                            styleable.StatsView_color2,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color3,
+                            styleable.StatsView_color3,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color4,
+                            styleable.StatsView_color4,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color5,
+                            styleable.StatsView_color5,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color6,
+                            styleable.StatsView_color6,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color7,
+                            styleable.StatsView_color7,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color8,
+                            styleable.StatsView_color8,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color9,
+                            styleable.StatsView_color9,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color10,
+                            styleable.StatsView_color10,
                             randomColor()
                     )
             )
         }
     }
 
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val paintOfElements= Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = lineWidth
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
     }
+
+    private val paintOfEmptySpace= Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = lineWidth
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
+    }
+
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
         textAlign = Paint.Align.CENTER
@@ -89,6 +97,18 @@ class StatsView @JvmOverloads constructor(
     }
 
     var data: List<Float> = emptyList()
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    var sumValues: Float = 0F
+    set(value) {
+        field = value
+        invalidate()
+    }
+
+    var colorOfEmptySpace: Int = 0
         set(value) {
             field = value
             invalidate()
@@ -109,20 +129,21 @@ class StatsView @JvmOverloads constructor(
         }
 
         var startFrom = -90F
-        val sumValues = data.sum()
+        paintOfEmptySpace.color = colorOfEmptySpace
+        canvas.drawCircle(center.x, center.y, radius, paintOfEmptySpace)
 
         for ((index, datum) in data.withIndex()) {
-            val angle = 360F * (datum / sumValues)
-            paint.color = colors.getOrNull(index) ?: randomColor()
-            canvas.drawArc(oval, startFrom, angle, false, paint)
-            paint.color = colors[0]
-            canvas.drawArc(oval, -90F, 1F, false, paint)
+            val angle = (datum * 3.6F)
+            paintOfElements.color = colors.getOrNull(index) ?: randomColor()
+            canvas.drawArc(oval, startFrom, angle, false, paintOfElements)
+            paintOfElements.color = colors[0]
+            canvas.drawArc(oval, -90F, 1F, false, paintOfElements)
 
             startFrom += angle
         }
 
         canvas.drawText(
-                "%.2f%%".format(100F),
+                "%.2f%%".format(sumValues),
                 center.x,
                 center.y + textPaint.textSize / 4,
                 textPaint
