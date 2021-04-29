@@ -7,7 +7,9 @@ import android.graphics.PointF
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
+import ru.netology.custom_view.R
 import ru.netology.custom_view.R.styleable
 import ru.netology.custom_view.utils.Utils
 import kotlin.math.min
@@ -26,6 +28,8 @@ class StatsView @JvmOverloads constructor(
     private var lineWidth = Utils.dp(context, 5F).toFloat()
     private var fontSize = Utils.dp(context, 40F).toFloat()
     private var colors = emptyList<Int>()
+    private var sumValues: Float = 0F
+    private var colorOfEmptySpace = ContextCompat.getColor(context, R.color.light_grey)
 
     init {
         context.withStyledAttributes(attrs, styleable.StatsView) {
@@ -92,18 +96,7 @@ class StatsView @JvmOverloads constructor(
     var data: List<Float> = emptyList()
         set(value) {
             field = value
-            invalidate()
-        }
-
-    var sumValues: Float = 0F
-        set(value) {
-            field = value
-            invalidate()
-        }
-
-    var colorOfEmptySpace: Int = 0
-        set(value) {
-            field = value
+            sumValues = data.sum()
             invalidate()
         }
 

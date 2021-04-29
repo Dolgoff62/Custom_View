@@ -1,10 +1,7 @@
 package ru.netology.custom_view.ui
 
-import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
+import androidx.appcompat.app.AppCompatActivity
 import ru.netology.custom_view.R
 
 class MainActivity : AppCompatActivity() {
@@ -19,8 +16,6 @@ class MainActivity : AppCompatActivity() {
                 20F,
                 15F
             )
-            it.sumValues = it.data.sum()
-            it.colorOfEmptySpace = ContextCompat.getColor(this, R.color.light_grey)
         }
     }
 }
