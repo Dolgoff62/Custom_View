@@ -26,6 +26,7 @@ class StatsView @JvmOverloads constructor(
     private var lineWidth = Utils.dp(context, 5F).toFloat()
     private var fontSize = Utils.dp(context, 40F).toFloat()
     private var colors = emptyList<Int>()
+    private var sumValues = 0F
 
     init {
         context.withStyledAttributes(attrs, R.styleable.StatsView) {
@@ -91,6 +92,7 @@ class StatsView @JvmOverloads constructor(
     var data: List<Float> = emptyList()
         set(value) {
             field = value
+            sumValues = data.sum()
             invalidate()
         }
 
@@ -109,7 +111,6 @@ class StatsView @JvmOverloads constructor(
         }
 
         var startFrom = -90F
-        val sumValues = data.sum()
 
         for ((index, datum) in data.withIndex()) {
             val angle = 360F * (datum / sumValues)
