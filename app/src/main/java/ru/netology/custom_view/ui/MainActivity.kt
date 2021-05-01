@@ -1,7 +1,7 @@
 package ru.netology.custom_view.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import ru.netology.custom_view.R
 
 class MainActivity : AppCompatActivity() {
@@ -9,11 +9,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        findViewById<StatsView>(R.id.stats).data = listOf(
-                200F,
-                150F,
-                100F,
-                500F
-        )
+        findViewById<StatsView>(R.id.stats).let {
+            it.data = listOf(
+                20F,
+                20F,
+                20F,
+                15F
+            )
+        }
     }
 }

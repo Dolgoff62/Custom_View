@@ -7,9 +7,11 @@ import android.graphics.PointF
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import ru.netology.custom_view.R
-import ru.netology.custom_view.utils.*
+import ru.netology.custom_view.R.styleable
+import ru.netology.custom_view.utils.Utils
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -26,51 +28,52 @@ class StatsView @JvmOverloads constructor(
     private var lineWidth = Utils.dp(context, 5F).toFloat()
     private var fontSize = Utils.dp(context, 40F).toFloat()
     private var colors = emptyList<Int>()
-    private var sumValues = 0F
+    private var sumValues: Float = 0F
+    private var colorOfEmptySpace = ContextCompat.getColor(context, R.color.light_grey)
 
     init {
-        context.withStyledAttributes(attrs, R.styleable.StatsView) {
-            lineWidth = getDimension(R.styleable.StatsView_lineWidth, lineWidth)
-            fontSize = getDimension(R.styleable.StatsView_fontSize, fontSize)
+        context.withStyledAttributes(attrs, styleable.StatsView) {
+            lineWidth = getDimension(styleable.StatsView_lineWidth, lineWidth)
+            fontSize = getDimension(styleable.StatsView_fontSize, fontSize)
             colors = listOf(
                     getColor(
-                            R.styleable.StatsView_color1,
+                            styleable.StatsView_color1,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color2,
+                            styleable.StatsView_color2,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color3,
+                            styleable.StatsView_color3,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color4,
+                            styleable.StatsView_color4,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color5,
+                            styleable.StatsView_color5,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color6,
+                            styleable.StatsView_color6,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color7,
+                            styleable.StatsView_color7,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color8,
+                            styleable.StatsView_color8,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color9,
+                            styleable.StatsView_color9,
                             randomColor()
                     ),
                     getColor(
-                            R.styleable.StatsView_color10,
+                            styleable.StatsView_color10,
                             randomColor()
                     )
             )
@@ -83,6 +86,7 @@ class StatsView @JvmOverloads constructor(
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
     }
+
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
         textAlign = Paint.Align.CENTER
@@ -111,9 +115,16 @@ class StatsView @JvmOverloads constructor(
         }
 
         var startFrom = -90F
+        paint.color = colorOfEmptySpace
+        canvas.drawCircle(center.x, center.y, radius, paint)
 
         for ((index, datum) in data.withIndex()) {
-            val angle = 360F * (datum / sumValues)
+
+            val angle = if (sumValues > 100F) {
+                360F * (datum / sumValues)
+            } else {
+                (datum * 3.6F)
+            }
             paint.color = colors.getOrNull(index) ?: randomColor()
             canvas.drawArc(oval, startFrom, angle, false, paint)
             paint.color = colors[0]
@@ -123,7 +134,13 @@ class StatsView @JvmOverloads constructor(
         }
 
         canvas.drawText(
-                "%.2f%%".format(100F),
+                "%.2f%%".format(
+                        if (sumValues > 100F) {
+                            100F
+                        } else {
+                            sumValues
+                        }
+                ),
                 center.x,
                 center.y + textPaint.textSize / 4,
                 textPaint
