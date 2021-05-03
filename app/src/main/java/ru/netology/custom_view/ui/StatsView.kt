@@ -1,5 +1,6 @@
 package ru.netology.custom_view.ui
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -7,6 +8,7 @@ import android.graphics.PointF
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
+import android.view.animation.LinearInterpolator
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import ru.netology.custom_view.R
@@ -30,6 +32,8 @@ class StatsView @JvmOverloads constructor(
     private var colors = emptyList<Int>()
     private var sumValues: Float = 0F
     private var colorOfEmptySpace = ContextCompat.getColor(context, R.color.light_grey)
+    private var valueAnimator: ValueAnimator? = null
+    private var progress = 0F
 
     init {
         context.withStyledAttributes(attrs, styleable.StatsView) {
@@ -97,8 +101,27 @@ class StatsView @JvmOverloads constructor(
         set(value) {
             field = value
             sumValues = data.sum()
-            invalidate()
+            update()
         }
+
+    private fun update() {
+        valueAnimator?.let {
+            it.removeAllListeners()
+            it.cancel()
+        }
+        progress = 0F
+
+        valueAnimator = ValueAnimator.ofFloat(0F, 1F).apply {
+            addUpdateListener { anim ->
+                progress = anim.animatedValue as Float
+                invalidate()
+            }
+            duration = 10_000
+            interpolator = LinearInterpolator()
+        }.also {
+            it.start()
+        }
+    }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         radius = min(w, h) / 2F - lineWidth / 2
@@ -110,26 +133,35 @@ class StatsView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
-        if (data.isEmpty()) {
+        if (data.isEmpty() || progress == 0F) {
             return
         }
-
-        var startFrom = -90F
+        var startFrom = INITIAL_ANGLE
+        val maxAngle = 360 * progress
         paint.color = colorOfEmptySpace
         canvas.drawCircle(center.x, center.y, radius, paint)
-
         for ((index, datum) in data.withIndex()) {
-
             val angle = if (sumValues > 100F) {
                 360F * (datum / sumValues)
             } else {
-                (datum * 3.6F)
+                datum * 3.6F
             }
-            paint.color = colors.getOrNull(index) ?: randomColor()
-            canvas.drawArc(oval, startFrom, angle, false, paint)
-            paint.color = colors[0]
-            canvas.drawArc(oval, -90F, 1F, false, paint)
 
+            if (startFrom - INITIAL_ANGLE + angle > maxAngle) {
+                drawData(
+                        index = index,
+                        canvas = canvas,
+                        startFrom = startFrom,
+                        sweepAngle = maxAngle - startFrom + INITIAL_ANGLE
+                )
+                return
+            }
+            drawData(
+                    index = index,
+                    canvas = canvas,
+                    startFrom = startFrom,
+                    sweepAngle = angle
+            )
             startFrom += angle
         }
 
@@ -145,6 +177,22 @@ class StatsView @JvmOverloads constructor(
                 center.y + textPaint.textSize / 4,
                 textPaint
         )
+    }
+
+    private fun drawData(
+            index: Int,
+            canvas: Canvas,
+            startFrom: Float,
+            sweepAngle: Float,
+    ) {
+        paint.color = colors.getOrNull(index) ?: randomColor()
+        canvas.drawArc(oval, startFrom, sweepAngle, false, paint)
+        paint.color = colors[0]
+        canvas.drawArc(oval, INITIAL_ANGLE, 1F, false, paint)
+    }
+
+    companion object {
+        const val INITIAL_ANGLE = -90F
     }
 
     private fun randomColor() = Random.nextInt(0xFF000000.toInt(), 0xFFFFFFFF.toInt())
