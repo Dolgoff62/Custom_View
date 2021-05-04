@@ -193,7 +193,6 @@ class StatsView @JvmOverloads constructor(
     ) {
         paint.color = colors.getOrNull(index) ?: randomColor()
         canvas.drawArc(oval, startFrom, sweepAngle, false, paint)
-        paint.color = colors[0]
     }
 
     private companion object {
