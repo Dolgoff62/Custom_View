@@ -138,8 +138,9 @@ class StatsView @JvmOverloads constructor(
         }
         var startFrom = INITIAL_ANGLE
         val maxAngle = 360 * progress
-        paint.color = colorOfEmptySpace
-        canvas.drawCircle(center.x, center.y, radius, paint)
+
+        drawCircleBackground(canvas)
+
         for ((index, datum) in data.withIndex()) {
             val angle = if (sumValues > 100F) {
                 360F * (datum / sumValues)
@@ -179,6 +180,11 @@ class StatsView @JvmOverloads constructor(
         )
     }
 
+    private fun drawCircleBackground(canvas: Canvas) {
+        paint.color = colorOfEmptySpace
+        canvas.drawCircle(center.x, center.y, radius, paint)
+    }
+
     private fun drawData(
             index: Int,
             canvas: Canvas,
@@ -188,10 +194,9 @@ class StatsView @JvmOverloads constructor(
         paint.color = colors.getOrNull(index) ?: randomColor()
         canvas.drawArc(oval, startFrom, sweepAngle, false, paint)
         paint.color = colors[0]
-        canvas.drawArc(oval, INITIAL_ANGLE, 1F, false, paint)
     }
 
-    companion object {
+    private companion object {
         const val INITIAL_ANGLE = -90F
     }
 

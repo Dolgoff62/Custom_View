@@ -18,8 +18,5 @@ class MainActivity : AppCompatActivity() {
                 20F,
                 15F
         )
-
-
-//        view.startAnimation(AnimationUtils.loadAnimation(this, R.anim.view_animation))
     }
 }
