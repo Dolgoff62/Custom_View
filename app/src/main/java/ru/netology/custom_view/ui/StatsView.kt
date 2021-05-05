@@ -34,6 +34,7 @@ class StatsView @JvmOverloads constructor(
     private var colorOfEmptySpace = ContextCompat.getColor(context, R.color.light_grey)
     private var valueAnimator: ValueAnimator? = null
     private var progress = 0F
+    private var totalPercentage = 0F
 
     init {
         context.withStyledAttributes(attrs, styleable.StatsView) {
@@ -97,12 +98,8 @@ class StatsView @JvmOverloads constructor(
         textSize = fontSize
     }
 
-    var data: List<Float> = emptyList()
-        set(value) {
-            field = value
-            sumValues = data.sum()
-            update()
-        }
+    private var data: List<Float> = emptyList()
+
 
     private fun update() {
         valueAnimator?.let {
@@ -137,23 +134,21 @@ class StatsView @JvmOverloads constructor(
             return
         }
         var startFrom = INITIAL_ANGLE
-        val maxAngle = 360 * progress
+        val maxAngle = 360 * progress + INITIAL_ANGLE
 
         drawCircleBackground(canvas)
 
         for ((index, datum) in data.withIndex()) {
-            val angle = if (sumValues > 100F) {
-                360F * (datum / sumValues)
-            } else {
-                datum * 3.6F
-            }
 
-            if (startFrom - INITIAL_ANGLE + angle > maxAngle) {
+            val angle = 360 * (datum / sumValues)
+            val sweepAngle = min(angle, maxAngle - startFrom)
+
+            if (startFrom + angle > maxAngle) {
                 drawData(
                         index = index,
                         canvas = canvas,
                         startFrom = startFrom,
-                        sweepAngle = maxAngle - startFrom + INITIAL_ANGLE
+                        sweepAngle
                 )
                 return
             }
@@ -161,18 +156,14 @@ class StatsView @JvmOverloads constructor(
                     index = index,
                     canvas = canvas,
                     startFrom = startFrom,
-                    sweepAngle = angle
+                    sweepAngle
             )
             startFrom += angle
         }
 
         canvas.drawText(
                 "%.2f%%".format(
-                        if (sumValues > 100F) {
-                            100F
-                        } else {
-                            sumValues
-                        }
+                        totalPercentage
                 ),
                 center.x,
                 center.y + textPaint.textSize / 4,
@@ -193,10 +184,28 @@ class StatsView @JvmOverloads constructor(
     ) {
         paint.color = colors.getOrNull(index) ?: randomColor()
         canvas.drawArc(oval, startFrom, sweepAngle, false, paint)
+        if (sumValues >= data.sum()) {
+            paint.color = colors[0]
+            canvas.drawArc(oval, -90F, 1F, false, paint)
+        }
     }
 
     private companion object {
-        const val INITIAL_ANGLE = -90F
+        private const val INITIAL_ANGLE = -90F
+    }
+
+    fun setData(data: List<Float>, sumValues: Float? = null) {
+        if (sumValues == null) {
+            this.sumValues = data.sum()
+        } else {
+            require(sumValues >= data.sum()) {
+                "`sumValues` argument should be greater or equal then sum of all `data` values"
+            }
+            this.sumValues = sumValues
+            this.totalPercentage = (data.sum() / sumValues) * 100
+        }
+        this.data = data
+        update()
     }
 
     private fun randomColor() = Random.nextInt(0xFF000000.toInt(), 0xFFFFFFFF.toInt())

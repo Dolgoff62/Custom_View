@@ -11,12 +11,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-         val view = findViewById<StatsView>(R.id.stats)
-        view.data = listOf(
-                20F,
-                20F,
-                20F,
-                15F
+        val view = findViewById<StatsView>(R.id.stats)
+
+        view.setData(data = listOf(
+                25F,
+                10F,
+                10F,
+                5F
+        ),
+                100F
         )
     }
 }
