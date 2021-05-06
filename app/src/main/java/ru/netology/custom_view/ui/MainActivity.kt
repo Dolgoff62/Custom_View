@@ -13,13 +13,14 @@ class MainActivity : AppCompatActivity() {
 
         val view = findViewById<StatsView>(R.id.stats)
 
-        view.setData(data = listOf(
+        view.setData(
+            data = listOf(
                 25F,
-                10F,
-                10F,
-                5F
-        ),
-                100F
+                25F,
+                25F,
+                25F
+            ),
+            sumValues = 200F
         )
     }
 }

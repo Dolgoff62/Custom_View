@@ -18,10 +18,10 @@ import kotlin.math.min
 import kotlin.random.Random
 
 class StatsView @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0,
-        defStyleRes: Int = 0,
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+    defStyleRes: Int = 0,
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
     private var radius = 0F
     private var center = PointF(0F, 0F)
@@ -41,46 +41,46 @@ class StatsView @JvmOverloads constructor(
             lineWidth = getDimension(styleable.StatsView_lineWidth, lineWidth)
             fontSize = getDimension(styleable.StatsView_fontSize, fontSize)
             colors = listOf(
-                    getColor(
-                            styleable.StatsView_color1,
-                            randomColor()
-                    ),
-                    getColor(
-                            styleable.StatsView_color2,
-                            randomColor()
-                    ),
-                    getColor(
-                            styleable.StatsView_color3,
-                            randomColor()
-                    ),
-                    getColor(
-                            styleable.StatsView_color4,
-                            randomColor()
-                    ),
-                    getColor(
-                            styleable.StatsView_color5,
-                            randomColor()
-                    ),
-                    getColor(
-                            styleable.StatsView_color6,
-                            randomColor()
-                    ),
-                    getColor(
-                            styleable.StatsView_color7,
-                            randomColor()
-                    ),
-                    getColor(
-                            styleable.StatsView_color8,
-                            randomColor()
-                    ),
-                    getColor(
-                            styleable.StatsView_color9,
-                            randomColor()
-                    ),
-                    getColor(
-                            styleable.StatsView_color10,
-                            randomColor()
-                    )
+                getColor(
+                    styleable.StatsView_color1,
+                    randomColor()
+                ),
+                getColor(
+                    styleable.StatsView_color2,
+                    randomColor()
+                ),
+                getColor(
+                    styleable.StatsView_color3,
+                    randomColor()
+                ),
+                getColor(
+                    styleable.StatsView_color4,
+                    randomColor()
+                ),
+                getColor(
+                    styleable.StatsView_color5,
+                    randomColor()
+                ),
+                getColor(
+                    styleable.StatsView_color6,
+                    randomColor()
+                ),
+                getColor(
+                    styleable.StatsView_color7,
+                    randomColor()
+                ),
+                getColor(
+                    styleable.StatsView_color8,
+                    randomColor()
+                ),
+                getColor(
+                    styleable.StatsView_color9,
+                    randomColor()
+                ),
+                getColor(
+                    styleable.StatsView_color10,
+                    randomColor()
+                )
             )
         }
     }
@@ -124,51 +124,55 @@ class StatsView @JvmOverloads constructor(
         radius = min(w, h) / 2F - lineWidth / 2
         center = PointF(w / 2F, h / 2F)
         oval = RectF(
-                center.x - radius, center.y - radius,
-                center.x + radius, center.y + radius
+            center.x - radius, center.y - radius,
+            center.x + radius, center.y + radius
         )
     }
 
     override fun onDraw(canvas: Canvas) {
+        drawCircleBackground(canvas)
+        drawPercentage(canvas)
+
         if (data.isEmpty() || progress == 0F) {
             return
         }
         var startFrom = INITIAL_ANGLE
         val maxAngle = 360 * progress + INITIAL_ANGLE
 
-        drawCircleBackground(canvas)
-
         for ((index, datum) in data.withIndex()) {
+
+            if (startFrom > maxAngle) return
 
             val angle = 360 * (datum / sumValues)
             val sweepAngle = min(angle, maxAngle - startFrom)
 
-            if (startFrom + angle > maxAngle) {
-                drawData(
-                        index = index,
-                        canvas = canvas,
-                        startFrom = startFrom,
-                        sweepAngle
-                )
-                return
-            }
             drawData(
-                    index = index,
-                    canvas = canvas,
-                    startFrom = startFrom,
-                    sweepAngle
+                index = index,
+                canvas = canvas,
+                startFrom = startFrom,
+                sweepAngle
             )
             startFrom += angle
         }
+        drawIfFullCircle(canvas)
+    }
 
+    private fun drawPercentage(canvas: Canvas) {
         canvas.drawText(
-                "%.2f%%".format(
-                        totalPercentage
-                ),
-                center.x,
-                center.y + textPaint.textSize / 4,
-                textPaint
+            "%.2f%%".format(
+                totalPercentage
+            ),
+            center.x,
+            center.y + textPaint.textSize / 4,
+            textPaint
         )
+    }
+
+    private fun drawIfFullCircle(canvas: Canvas) {
+        if (totalPercentage == 100F && data.sum() != 0F) {
+            paint.color = colors[0]
+            canvas.drawArc(oval, -90F, 1F, false, paint)
+        }
     }
 
     private fun drawCircleBackground(canvas: Canvas) {
@@ -177,17 +181,13 @@ class StatsView @JvmOverloads constructor(
     }
 
     private fun drawData(
-            index: Int,
-            canvas: Canvas,
-            startFrom: Float,
-            sweepAngle: Float,
+        index: Int,
+        canvas: Canvas,
+        startFrom: Float,
+        sweepAngle: Float,
     ) {
         paint.color = colors.getOrNull(index) ?: randomColor()
         canvas.drawArc(oval, startFrom, sweepAngle, false, paint)
-        if (sumValues >= data.sum()) {
-            paint.color = colors[0]
-            canvas.drawArc(oval, -90F, 1F, false, paint)
-        }
     }
 
     private companion object {
@@ -202,12 +202,11 @@ class StatsView @JvmOverloads constructor(
                 "`sumValues` argument should be greater or equal then sum of all `data` values"
             }
             this.sumValues = sumValues
-            this.totalPercentage = (data.sum() / sumValues) * 100
         }
+        this.totalPercentage = (data.sum() / this.sumValues) * 100
         this.data = data
         update()
     }
 
     private fun randomColor() = Random.nextInt(0xFF000000.toInt(), 0xFFFFFFFF.toInt())
 }
-
